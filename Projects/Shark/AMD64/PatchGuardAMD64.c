@@ -652,7 +652,7 @@ InitializePgBlock(
                                     TempField = (u64)__rva_to_va(TargetPc + 3) + Diff;
 
                                     if ((u)TempField ==
-                                        (u)GetRtBlock(Block)->DbgPrint) {
+                                        (u)GetRtBlock(Block)->MyDbgPrint) {
                                         TempField = (u64)__rva_to_va(TargetPc + 17) + Diff;
 
                                         RtlCopyMemory(

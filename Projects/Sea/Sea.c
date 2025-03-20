@@ -39,12 +39,22 @@ NtProcessStartup(
         if (ST_SUCCESS(Status)) {
             Status = SupLdrLoad(KernelString, "Shark", CmdReload | CmdPgClear);
 
+			wchar_t ErrorString[255] = { 0 };
+			swprintf(
+				ErrorString, L"SupLdrLoad code < %08x >\n", Status);
+			MessageBoxW(0i64, ErrorString, L"error", 0);
+
             SupTerm();
         }
         else {
             printf(
-                TEXT("load driver error code < %08x >\n"),
+                TEXT("Init driver error code < %08x >\n"),
                 Status);
+
+			wchar_t ErrorString[255] = {0};
+			swprintf(
+				ErrorString, L"Init driver error code < %08x >\n", Status);
+			MessageBoxW(0i64, ErrorString, L"error", 0);
 
             _getwch();
         }
@@ -55,6 +65,11 @@ NtProcessStartup(
         printf(
             TEXT("load driver error code < %08x >\n"),
             Status);
+
+		wchar_t ErrorString[255] = { 0 };
+		swprintf(
+			ErrorString, L"Load driver error code < %08x >\n", Status);
+		MessageBoxW(0i64, ErrorString, L"error", 0);
 
         _getwch();
     }

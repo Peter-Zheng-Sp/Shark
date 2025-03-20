@@ -19,7 +19,7 @@
 #ifndef _PATCHGUARD_H_
 #define _PATCHGUARD_H_
 
-#include "..\..\WRK\base\ntos\mm\mi.h"
+#include "..\..\..\MiniSDK\inc\base\ntos\mm\mi.h"
 
 #include "Guard.h"
 #include "Reload.h"

@@ -316,9 +316,9 @@ extern "C" {
             );
 
         u32
-        (NTAPI * DbgPrint)(
-            __in PCH Format,
-            ...
+        (NTAPI * MyDbgPrint)(
+			__in PCH Format,
+			...
             );
 
         NTSTATUS

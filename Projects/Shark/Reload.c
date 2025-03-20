@@ -193,14 +193,14 @@ InitializeGpBlock(
 
     RtlInitUnicodeString(&String, L"DbgPrint");
 
-    Rtb->DbgPrint = MmGetSystemRoutineAddress(&String);
+    Rtb->vDbgPrint = MyDbgPrint;
 
     if (CmdReload !=
         (Rtb->Operation & CmdReload)) {
 #ifdef DEBUG
         vDbgPrint(
             "[SHARK] < %p > DbgPrint\n",
-            Rtb->DbgPrint);
+            Rtb->vDbgPrint);
 #endif // DEBUG
     }
 

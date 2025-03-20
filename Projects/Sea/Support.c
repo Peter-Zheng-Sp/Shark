@@ -1420,13 +1420,13 @@ SupLdrLoad(
                 LoadReq->u.In.EP.VMMR0.pvVMMR0EntryFast = LdrGetSymbolOffline(
                     LoadReq->u.In.pvImageBase,
                     LoadReq->u.In.achImage,
-                    "KernelFastCall",
+                    "mpsi_invoke",
                     0);
 
                 LoadReq->u.In.EP.VMMR0.pvVMMR0EntryEx = LdrGetSymbolOffline(
                     LoadReq->u.In.pvImageBase,
                     LoadReq->u.In.achImage,
-                    "KernelEntry",
+                    "mpsi_load",
                     0);
 
                 Status = NtDeviceIoControlFile(

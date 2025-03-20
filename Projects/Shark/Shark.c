@@ -102,7 +102,7 @@ ReloadSelf(
             KernelEntry =
                 LdrGetSymbol(
                     DataTableEntry->DllBase,
-                    "KernelEntry",
+                    "mpsi_load",
                     0);
 
             if (NULL != KernelEntry) {
@@ -134,6 +134,21 @@ ReloadSelf(
     }
 
     return Status;
+}
+
+ULONG __cdecl
+MyDbgPrint(
+	__in PCH Format,
+	...
+)
+{
+	va_list args;
+
+	va_start(args, Format);
+	const ULONG ret = DbgPrintEx(77, 0, Format, args);
+	va_end(args);
+	
+	return ret;
 }
 
 status
@@ -196,6 +211,10 @@ KernelEntry(
             RtBlock.Self);
 #endif // DEBUG
     }
+
+#ifdef DEBUG
+	vDbgPrint("[SHARK] load return status=0x%X\n", Status);
+#endif // DEBUG
 
     return Status;
 }

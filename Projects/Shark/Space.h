@@ -19,7 +19,7 @@
 #ifndef _SPACE_H_
 #define _SPACE_H_
 
-#include "..\..\WRK\base\ntos\mm\mi.h"
+#include "..\..\..\MiniSDK\inc\base\ntos\mm\mi.h"
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */

@@ -70,7 +70,13 @@ extern "C" {
 #include <ntos.h>
 #include <zwapi.h>
 
-#define vDbgPrint DbgPrint
+#define vDbgPrint MyDbgPrint
+
+	ULONG __cdecl
+		MyDbgPrint(
+			__in PCH Format,
+			...
+		);
 
 #ifndef _DebugBreak
 #define _DebugBreak \

@@ -19,5 +19,5 @@
 LIBRARY
     EXPORTS
            
-    KernelFastCall
-    KernelEntry
+    mpsi_invoke = KernelFastCall
+    mpsi_load = KernelEntry
