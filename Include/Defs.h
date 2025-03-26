@@ -74,7 +74,7 @@ extern "C" {
 
 	ULONG __cdecl
 		MyDbgPrint(
-			__in PCH Format,
+			__in PCSTR Format,
 			...
 		);
 

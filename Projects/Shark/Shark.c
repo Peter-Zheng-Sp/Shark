@@ -138,17 +138,87 @@ ReloadSelf(
 
 ULONG __cdecl
 MyDbgPrint(
-	__in PCH Format,
+	__in PCSTR Format,
 	...
 )
 {
-	va_list args;
+	va_list arglist;
+	va_start(arglist, Format);
 
-	va_start(args, Format);
-	const ULONG ret = DbgPrintEx(77, 0, Format, args);
-	va_end(args);
+	const ULONG ret = vDbgPrintEx(77, 0, Format, arglist);
+	
+	va_end(arglist);
 	
 	return ret;
+}
+
+static void WPON(KIRQL irql)
+{
+	ULONG_PTR cr0 = __readcr0();
+	cr0 |= 0x10000;
+	__writecr0(cr0);
+	_enable();
+	KeLowerIrql(irql);
+}
+
+static KIRQL WPOFF()
+{
+	KIRQL irql = KeRaiseIrqlToDpcLevel();
+	ULONG_PTR cr0 = __readcr0();
+	cr0 &= 0xfffffffffffeffff;
+	_disable();
+	__writecr0(cr0);
+	return irql;
+}
+
+static
+BOOLEAN 
+NTAPI MarkDriverLoadedFlag(PDRIVER_OBJECT lpDriverObject)
+{
+	if (!lpDriverObject)
+	{
+		return FALSE;
+	}
+
+	PLIST_ENTRY lpEntry = NULL, lpOrigin = NULL;
+	lpOrigin = (PLIST_ENTRY)lpDriverObject->DriverSection;
+	lpEntry = lpOrigin;
+	if (!lpEntry)
+	{
+		return FALSE;
+	}
+
+	WCHAR wszBeepDriverName[] = {L'b', L'e', L'e', L'p', L'.', L's', L'y', L's', L'\0'};
+
+	UNICODE_STRING uniDrvName = { 0 };
+	RtlInitUnicodeString(&uniDrvName, wszBeepDriverName);
+
+	lpEntry = lpEntry->Flink;
+	while (lpEntry && lpEntry != lpOrigin)
+	{
+		PLDR_DATA_TABLE_ENTRY TableEntry = CONTAINING_RECORD(lpEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+		if (TableEntry->SizeOfImage && TableEntry->DllBase && MmIsAddressValid(TableEntry) && MmIsAddressValid(TableEntry->BaseDllName.Buffer))
+		{
+			if (RtlEqualUnicodeString(&uniDrvName, &TableEntry->BaseDllName, TRUE))
+			{
+#ifdef DEBUG
+				vDbgPrint("[SHARK] mark address: 0x%llX\n", TableEntry->DllBase);
+#endif // DEBUG
+
+				KIRQL irql = WPOFF();
+				
+				ULONG ulPatchValue = 0x00004B53; /** 'SK' */
+				RtlCopyMemory(TableEntry->DllBase, &ulPatchValue, sizeof(ULONG));
+				
+				WPON(irql);
+
+				break;
+			}
+		}
+		lpEntry = lpEntry->Flink;
+	}
+
+	return TRUE;
 }
 
 status
@@ -156,12 +226,10 @@ NTAPI
 KernelEntry(
     __in ptr Self,
     __in u32 Operation,
-    __in ptr Reserve, // do not use
+    __in ptr LoaderDrvBase,
     __in ptr Nothing
 )
 {
-    status Status = STATUS_SUCCESS;
-
     RtBlock.PgBlock = &PgBlock;
     PgBlock.RtBlock = &RtBlock;
 
@@ -212,9 +280,17 @@ KernelEntry(
 #endif // DEBUG
     }
 
+	if (LoaderDrvBase)
+	{
+		BOOLEAN bRet = MarkDriverLoadedFlag(LoaderDrvBase);
 #ifdef DEBUG
-	vDbgPrint("[SHARK] load return status=0x%X\n", Status);
+		vDbgPrint("[SHARK] mark driver loaded flag=%d\n", bRet);
+#endif // DEBUG
+	}
+
+#ifdef DEBUG
+	vDbgPrint("[SHARK] load success\n");
 #endif // DEBUG
 
-    return Status;
+    return STATUS_SUCCESS;
 }
